@@ -1,0 +1,65 @@
+@model Gestion_Projet.Models.Projet
+
+@{
+    ViewData["Title"] = "Supprimer le projet";
+}
+
+<h1 class="text-danger"><i class="bi bi-exclamation-triangle"></i> Supprimer le projet</h1>
+<hr />
+
+<div class="alert alert-danger">
+    <h4><i class="bi bi-exclamation-triangle-fill"></i> Attention !</h4>
+    <p>Êtes-vous sûr de vouloir supprimer ce projet ?</p>
+    <p><strong>⚠️ Toutes les tâches associées (@Model.Taches.Count tâche(s)) seront également supprimées.</strong></p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Informations du projet à supprimer</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nom:</dt>
+            <dd class="col-sm-9">@Model.Nom</dd>
+            
+            <dt class="col-sm-3">Chef de projet:</dt>
+            <dd class="col-sm-9">@Model.ChefProjet?.NomComplet</dd>
+            
+            <dt class="col-sm-3">Date début:</dt>
+            <dd class="col-sm-9">@Model.DateDebut.ToString("dd/MM/yyyy")</dd>
+            
+            <dt class="col-sm-3">Date fin prévue:</dt>
+            <dd class="col-sm-9">@(Model.DateFinPrevue?.ToString("dd/MM/yyyy") ?? "Non définie")</dd>
+            
+            <dt class="col-sm-3">Statut:</dt>
+            <dd class="col-sm-9">
+                <span class="badge bg-@(Model.Statut == Gestion_Projet.Models.StatutProjet.EnCours ? "success" : 
+                                          Model.Statut == Gestion_Projet.Models.StatutProjet.Termine ? "secondary" : "primary")">
+                    @Model.Statut
+                </span>
+            </dd>
+            
+            <dt class="col-sm-3">Nombre de tâches:</dt>
+            <dd class="col-sm-9">
+                <span class="badge bg-warning text-dark">@Model.Taches.Count tâche(s)</span>
+            </dd>
+        </dl>
+        
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <hr />
+            <h6>Description:</h6>
+            <p>@Model.Description</p>
+        }
+    </div>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Confirmer la suppression
+    </button>
+    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+        <i class="bi bi-x-circle"></i> Annuler
+    </a>
+</form>

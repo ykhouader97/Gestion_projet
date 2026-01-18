@@ -1,0 +1,122 @@
+@model Gestion_Projet.Models.Tache
+
+@{
+    ViewData["Title"] = "Détails de la tâche";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h1><i class="bi bi-card-checklist"></i> @Model.Titre</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group" role="group">
+            <form asp-action="ToggleComplete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-@(Model.EstTerminee ? "secondary" : "success")">
+                    <i class="bi bi-@(Model.EstTerminee ? "x-circle" : "check-circle")"></i> 
+                    @(Model.EstTerminee ? "Non terminée" : "Terminée")
+                </button>
+            </form>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Supprimer
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations de la tâche</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Titre:</dt>
+                    <dd class="col-sm-8">@Model.Titre</dd>
+                    
+                    <dt class="col-sm-4">Projet:</dt>
+                    <dd class="col-sm-8">
+                        <a asp-controller="Projets" asp-action="Details" asp-route-id="@Model.ProjetId">
+                            @Model.Projet?.Nom
+                        </a>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Assigné à:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Membre != null)
+                        {
+                            <a asp-controller="Membres" asp-action="Details" asp-route-id="@Model.MembreId">
+                                @Model.Membre.NomComplet
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Non assigné</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-4">Statut:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-@(Model.Statut == Gestion_Projet.Models.StatutTache.Terminee ? "success" : 
+                                                  Model.Statut == Gestion_Projet.Models.StatutTache.EnCours ? "primary" : 
+                                                  Model.Statut == Gestion_Projet.Models.StatutTache.EnRevue ? "warning" : "secondary")">
+                            @Model.Statut
+                        </span>
+                        @if (Model.EstTerminee)
+                        {
+                            <span class="badge bg-success ms-2">Terminée</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Priorité:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-@(Model.Priorite == Gestion_Projet.Models.Priorite.Basse ? "success" : 
+                                                  Model.Priorite == Gestion_Projet.Models.Priorite.Moyenne ? "info" : 
+                                                  Model.Priorite == Gestion_Projet.Models.Priorite.Haute ? "warning" : "danger")">
+                            @Model.Priorite
+                        </span>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Échéance:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.DateEcheance.HasValue)
+                        {
+                            @Model.DateEcheance.Value.ToString("dd/MM/yyyy")
+                            @if (Model.EstEnRetard)
+                            {
+                                <span class="badge bg-danger ms-2">En retard</span>
+                            }
+                            else if (Model.EstUrgente)
+                            {
+                                <span class="badge bg-warning text-dark ms-2">Urgent</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Non définie</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-4">Créée le:</dt>
+                    <dd class="col-sm-8">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <hr />
+            <h6>Description:</h6>
+            <p>@Model.Description</p>
+        }
+    </div>
+</div>

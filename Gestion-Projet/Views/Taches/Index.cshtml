@@ -1,0 +1,151 @@
+@model IEnumerable<Gestion_Projet.Models.Tache>
+
+@{
+    ViewData["Title"] = "Liste des tâches";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h1><i class="bi bi-list-check"></i> Tâches</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Nouvelle tâche
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Rechercher..." />
+                </div>
+                <div class="col-md-2">
+                    <select name="projetFilter" class="form-select" asp-items="ViewBag.Projets">
+                        <option value="">Tous les projets</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="membreFilter" class="form-select" asp-items="ViewBag.Membres">
+                        <option value="">Tous les membres</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="statutFilter" class="form-select" asp-items="ViewBag.Statuts">
+                        <option value="">Tous les statuts</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="prioriteFilter" class="form-select" asp-items="ViewBag.Priorites">
+                        <option value="">Toutes priorités</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="enRetardOnly" value="true" id="enRetardOnly" @(ViewData["EnRetardOnly"]?.ToString() == "True" ? "checked" : "")>
+                        <label class="form-check-label" for="enRetardOnly">
+                            Afficher uniquement les tâches en retard
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Titre</th>
+                    <th>Projet</th>
+                    <th>Assigné à</th>
+                    <th>Échéance</th>
+                    <th>Priorité</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tache in Model)
+                {
+                    <tr class="@(tache.EstEnRetard ? "table-danger" : tache.EstTerminee ? "table-success" : "")">
+                        <td>
+                            @tache.Titre
+                            @if (tache.EstUrgente)
+                            {
+                                <span class="badge bg-warning text-dark">Urgent</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-controller="Projets" asp-action="Details" asp-route-id="@tache.ProjetId">
+                                @tache.Projet?.Nom
+                            </a>
+                        </td>
+                        <td>
+                            @if (tache.Membre != null)
+                            {
+                                <a asp-controller="Membres" asp-action="Details" asp-route-id="@tache.MembreId">
+                                    @tache.Membre.NomComplet
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Non assigné</span>
+                            }
+                        </td>
+                        <td>@(tache.DateEcheance?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                        <td>
+                            <span class="badge bg-@(tache.Priorite == Gestion_Projet.Models.Priorite.Basse ? "success" : 
+                                                      tache.Priorite == Gestion_Projet.Models.Priorite.Moyenne ? "info" : 
+                                                      tache.Priorite == Gestion_Projet.Models.Priorite.Haute ? "warning" : "danger")">
+                                @tache.Priorite
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-@(tache.Statut == Gestion_Projet.Models.StatutTache.Terminee ? "success" : 
+                                                      tache.Statut == Gestion_Projet.Models.StatutTache.EnCours ? "primary" : 
+                                                      tache.Statut == Gestion_Projet.Models.StatutTache.EnRevue ? "warning" : "secondary")">
+                                @tache.Statut
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <form asp-action="ToggleComplete" asp-route-id="@tache.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-@(tache.EstTerminee ? "secondary" : "success")" title="@(tache.EstTerminee ? "Marquer non terminée" : "Marquer terminée")">
+                                        <i class="bi bi-@(tache.EstTerminee ? "x-circle" : "check-circle")"></i>
+                                    </button>
+                                </form>
+                                <a asp-action="Details" asp-route-id="@tache.Id" class="btn btn-info" title="Détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@tache.Id" class="btn btn-warning" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@tache.Id" class="btn btn-danger" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Aucune tâche trouvée. <a asp-action="Create">Créer une nouvelle tâche</a>
+    </div>
+}

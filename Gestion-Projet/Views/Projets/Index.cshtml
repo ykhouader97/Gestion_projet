@@ -1,0 +1,123 @@
+@model IEnumerable<Gestion_Projet.Models.Projet>
+
+@{
+    ViewData["Title"] = "Liste des projets";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h1><i class="bi bi-folder"></i> Projets</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouveau projet
+        </a>
+    </div>
+</div>
+
+<!-- Filtres et recherche -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Rechercher par nom..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="statutFilter" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        @foreach (var statut in Enum.GetValues(typeof(Gestion_Projet.Models.StatutProjet)))
+                        {
+                            <option value="@statut" selected="@(ViewData["StatutFilter"]?.ToString() == statut.ToString())">@statut</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="sortOrder" class="form-select">
+                        <option value="">Trier par nom (A-Z)</option>
+                        <option value="nom_desc">Trier par nom (Z-A)</option>
+                        <option value="Date">Trier par date (ancien)</option>
+                        <option value="date_desc">Trier par date (récent)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-search"></i> Filtrer
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table des projets -->
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Nom</th>
+                    <th>Chef de projet</th>
+                    <th>Date début</th>
+                    <th>Date fin</th>
+                    <th>Statut</th>
+                    <th>Avancement</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var projet in Model)
+                {
+                    <tr class="@(projet.EstEnRetard ? "table-danger" : "")">
+                        <td>
+                            <strong>@projet.Nom</strong>
+                            @if (projet.EstEnRetard)
+                            {
+                                <span class="badge bg-danger ms-2">En retard</span>
+                            }
+                        </td>
+                        <td>@projet.ChefProjet?.NomComplet</td>
+                        <td>@projet.DateDebut.ToString("dd/MM/yyyy")</td>
+                        <td>@(projet.DateFinPrevue?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                        <td>
+                            <span class="badge bg-@(projet.Statut == Gestion_Projet.Models.StatutProjet.EnCours ? "success" : 
+                                                      projet.Statut == Gestion_Projet.Models.StatutProjet.Termine ? "secondary" : 
+                                                      projet.Statut == Gestion_Projet.Models.StatutProjet.Planification ? "primary" : 
+                                                      projet.Statut == Gestion_Projet.Models.StatutProjet.EnPause ? "warning" : "dark")">
+                                @projet.Statut
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress" style="min-width: 100px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @projet.PourcentageAvancement%" 
+                                     aria-valuenow="@projet.PourcentageAvancement" aria-valuemin="0" aria-valuemax="100">
+                                    @projet.PourcentageAvancement%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a asp-action="Details" asp-route-id="@projet.Id" class="btn btn-info" title="Détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@projet.Id" class="btn btn-warning" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@projet.Id" class="btn btn-danger" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Aucun projet trouvé. <a asp-action="Create">Créer un nouveau projet</a>
+    </div>
+}

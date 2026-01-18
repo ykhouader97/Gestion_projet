@@ -1,0 +1,73 @@
+@model Gestion_Projet.Models.MembreEquipe
+
+@{
+    ViewData["Title"] = "Ajouter un membre";
+}
+
+<h1><i class="bi bi-person-plus"></i> Ajouter un nouveau membre</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Nom" class="form-label"></label>
+                    <input asp-for="Nom" class="form-control" />
+                    <span asp-validation-for="Nom" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Prenom" class="form-label"></label>
+                    <input asp-for="Prenom" class="form-control" />
+                    <span asp-validation-for="Prenom" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" type="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="Poste" class="form-label"></label>
+                <input asp-for="Poste" class="form-control" />
+                <span asp-validation-for="Poste" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="PhotoUrl" class="form-label"></label>
+                <input asp-for="PhotoUrl" class="form-control" type="url" placeholder="https://..." />
+                <span asp-validation-for="PhotoUrl" class="text-danger"></span>
+                <small class="form-text text-muted">URL de la photo de profil (optionnel)</small>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="DateEmbauche" class="form-label"></label>
+                <input asp-for="DateEmbauche" class="form-control" type="date" />
+                <span asp-validation-for="DateEmbauche" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input asp-for="EstActif" class="form-check-input" />
+                <label asp-for="EstActif" class="form-check-label"></label>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-info">
+                    <i class="bi bi-save"></i> Enregistrer
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

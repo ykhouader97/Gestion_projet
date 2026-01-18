@@ -1,0 +1,104 @@
+@model IEnumerable<Gestion_Projet.Models.MembreEquipe>
+
+@{
+    ViewData["Title"] = "Équipe";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h1><i class="bi bi-people"></i> Membres de l'équipe</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-info">
+            <i class="bi bi-person-plus"></i> Ajouter un membre
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="Rechercher par nom, prénom ou email..." />
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="actifsOnly" value="true" id="actifsOnly" @(ViewData["ActifsOnly"]?.ToString() == "True" ? "checked" : "")>
+                        <label class="form-check-label" for="actifsOnly">
+                            Afficher uniquement les membres actifs
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-search"></i> Filtrer
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var membre in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        @if (!string.IsNullOrEmpty(membre.PhotoUrl))
+                        {
+                            <img src="@membre.PhotoUrl" alt="@membre.NomComplet" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                @membre.Prenom.Substring(0, 1)@membre.Nom.Substring(0, 1)
+                            </div>
+                        }
+                        <h5 class="card-title">@membre.NomComplet</h5>
+                        <p class="text-muted mb-2">@membre.Poste</p>
+                        <p class="mb-2"><small><i class="bi bi-envelope"></i> @membre.Email</small></p>
+                        
+                        <div class="mb-3">
+                            @if (membre.EstActif)
+                            {
+                                <span class="badge bg-success">Actif</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactif</span>
+                            }
+                            @if (membre.ProjetsLed.Any())
+                            {
+                                <span class="badge bg-primary">Chef de projet</span>
+                            }
+                        </div>
+                        
+                        <p class="mb-3">
+                            <span class="badge bg-info">@membre.Taches.Count(t => !t.EstTerminee) tâches en cours</span>
+                        </p>
+                        
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a asp-action="Details" asp-route-id="@membre.Id" class="btn btn-info" title="Détails">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@membre.Id" class="btn btn-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Aucun membre trouvé. <a asp-action="Create">Ajouter un membre</a>
+    </div>
+}

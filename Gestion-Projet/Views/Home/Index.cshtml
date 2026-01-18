@@ -1,0 +1,189 @@
+﻿@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-4"><i class="bi bi-speedometer2"></i> Tableau de bord</h1>
+        <p class="lead">Vue d'ensemble de vos projets et tâches</p>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-folder"></i> Projets</h5>
+                <h2 class="card-text">@ViewBag.TotalProjets</h2>
+                <small>@ViewBag.ProjetsActifs actifs</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-check-circle"></i> Terminés</h5>
+                <h2 class="card-text">@ViewBag.ProjetsTermines</h2>
+                <small>projets complétés</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-exclamation-triangle"></i> En retard</h5>
+                <h2 class="card-text">@ViewBag.ProjetsEnRetard</h2>
+                <small>projets en retard</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-list-check"></i> Tâches</h5>
+                <h2 class="card-text">@ViewBag.TotalTaches</h2>
+                <small>@ViewBag.TachesTerminees terminées</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="btn-group" role="group">
+            <a asp-controller="Projets" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouveau projet
+            </a>
+            <a asp-controller="Taches" asp-action="Create" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Nouvelle tâche
+            </a>
+            <a asp-controller="Membres" asp-action="Create" class="btn btn-info">
+                <i class="bi bi-person-plus"></i> Ajouter un membre
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Derniers projets -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Derniers projets créés</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.DerniersProjets != null && ViewBag.DerniersProjets.Count > 0)
+                {
+                    <div class="list-group">
+                        @foreach (var projet in ViewBag.DerniersProjets)
+                        {
+                            <a asp-controller="Projets" asp-action="Details" asp-route-id="@projet.Id" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">@projet.Nom</h6>
+                                    <small>@projet.DateCreation.ToString("dd/MM/yyyy")</small>
+                                </div>
+                                <p class="mb-1">
+                                    <span class="badge bg-@(projet.Statut == Gestion_Projet.Models.StatutProjet.EnCours ? "success" : projet.Statut == Gestion_Projet.Models.StatutProjet.Termine ? "secondary" : "primary")">
+                                        @projet.Statut
+                                    </span>
+                                    Chef: @projet.ChefProjet?.NomComplet
+                                </p>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: @projet.PourcentageAvancement%"></div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Aucun projet pour le moment.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Tâches urgentes -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-alarm"></i> Tâches urgentes (échéance &lt; 3 jours)</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.TachesUrgentes != null && ViewBag.TachesUrgentes.Count > 0)
+                {
+                    <div class="list-group">
+                        @foreach (var tache in ViewBag.TachesUrgentes)
+                        {
+                            <a asp-controller="Taches" asp-action="Details" asp-route-id="@tache.Id" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">@tache.Titre</h6>
+                                    <small class="text-danger">
+                                        <i class="bi bi-calendar-event"></i> @tache.DateEcheance?.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                                <p class="mb-1">
+                                    <small>Projet: @tache.Projet?.Nom</small><br />
+                                    <small>Assigné à: @(tache.Membre?.NomComplet ?? "Non assigné")</small>
+                                </p>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Aucune tâche urgente.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Membres actifs -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Membres de l'équipe actifs</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.MembresActifs != null && ViewBag.MembresActifs.Count > 0)
+                {
+                    <div class="row">
+                        @foreach (var membre in ViewBag.MembresActifs)
+                        {
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        @if (!string.IsNullOrEmpty(membre.PhotoUrl))
+                                        {
+                                            <img src="@membre.PhotoUrl" alt="@membre.NomComplet" class="rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center mb-2" style="width: 80px; height: 80px; font-size: 2rem;">
+                                                @membre.Prenom.Substring(0, 1)@membre.Nom.Substring(0, 1)
+                                            </div>
+                                        }
+                                        <h6 class="mb-0">@membre.NomComplet</h6>
+                                        <small class="text-muted">@membre.Poste</small><br />
+                                        @{
+                                            var tachesEnCours = ((IEnumerable<Gestion_Projet.Models.Tache>)membre.Taches).Count(t => !t.EstTerminee);
+                                        }
+                                        <small><span class="badge bg-primary">@tachesEnCours tâches</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Aucun membre actif.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

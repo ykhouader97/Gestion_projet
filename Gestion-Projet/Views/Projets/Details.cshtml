@@ -1,0 +1,201 @@
+@model Gestion_Projet.Models.Projet
+
+@{
+    ViewData["Title"] = "Détails du projet";
+}
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h1><i class="bi bi-folder-fill"></i> @Model.Nom</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group" role="group">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Supprimer
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Informations du projet -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations du projet</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Nom:</dt>
+                    <dd class="col-sm-8">@Model.Nom</dd>
+                    
+                    <dt class="col-sm-4">Chef de projet:</dt>
+                    <dd class="col-sm-8">
+                        <a asp-controller="Membres" asp-action="Details" asp-route-id="@Model.ChefProjetId">
+                            @Model.ChefProjet?.NomComplet
+                        </a>
+                        <br /><small class="text-muted">@Model.ChefProjet?.Email</small>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Statut:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-@(Model.Statut == Gestion_Projet.Models.StatutProjet.EnCours ? "success" : 
+                                                  Model.Statut == Gestion_Projet.Models.StatutProjet.Termine ? "secondary" : 
+                                                  Model.Statut == Gestion_Projet.Models.StatutProjet.Planification ? "primary" : 
+                                                  Model.Statut == Gestion_Projet.Models.StatutProjet.EnPause ? "warning" : "dark")">
+                            @Model.Statut
+                        </span>
+                        @if (Model.EstEnRetard)
+                        {
+                            <span class="badge bg-danger ms-2">En retard</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Date début:</dt>
+                    <dd class="col-sm-8">@Model.DateDebut.ToString("dd/MM/yyyy")</dd>
+                    
+                    <dt class="col-sm-4">Date fin prévue:</dt>
+                    <dd class="col-sm-8">@(Model.DateFinPrevue?.ToString("dd/MM/yyyy") ?? "Non définie")</dd>
+                    
+                    <dt class="col-sm-4">Budget:</dt>
+                    <dd class="col-sm-8">@(Model.Budget?.ToString("N2") ?? "Non défini") DH</dd>
+                    
+                    <dt class="col-sm-4">Créé le:</dt>
+                    <dd class="col-sm-8">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <hr />
+            <h6>Description:</h6>
+            <p>@Model.Description</p>
+        }
+        
+        <hr />
+        <h6>Avancement:</h6>
+        <div class="progress" style="height: 30px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.PourcentageAvancement%" 
+                 aria-valuenow="@Model.PourcentageAvancement" aria-valuemin="0" aria-valuemax="100">
+                @Model.PourcentageAvancement%
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary">@Model.Taches.Count</h3>
+                        <small>Tâches totales</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-success">@Model.Taches.Count(t => t.EstTerminee)</h3>
+                        <small>Terminées</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning">@Model.Taches.Count(t => t.Statut == Gestion_Projet.Models.StatutTache.EnCours)</h3>
+                        <small>En cours</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-danger">@Model.Taches.Count(t => t.EstEnRetard)</h3>
+                        <small>En retard</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tâches du projet -->
+<div class="card">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-check"></i> Tâches du projet</h5>
+        <a asp-controller="Taches" asp-action="Create" asp-route-projetId="@Model.Id" class="btn btn-light btn-sm">
+            <i class="bi bi-plus-circle"></i> Ajouter une tâche
+        </a>
+    </div>
+    <div class="card-body">
+        @if (Model.Taches.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Assigné à</th>
+                            <th>Échéance</th>
+                            <th>Priorité</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tache in Model.Taches.OrderBy(t => t.DateEcheance))
+                        {
+                            <tr class="@(tache.EstEnRetard ? "table-danger" : tache.EstTerminee ? "table-success" : "")">
+                                <td>
+                                    @tache.Titre
+                                    @if (tache.EstUrgente)
+                                    {
+                                        <span class="badge bg-warning text-dark">Urgent</span>
+                                    }
+                                </td>
+                                <td>@(tache.Membre?.NomComplet ?? "Non assigné")</td>
+                                <td>@(tache.DateEcheance?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                <td>
+                                    <span class="badge bg-@(tache.Priorite == Gestion_Projet.Models.Priorite.Basse ? "success" : 
+                                                              tache.Priorite == Gestion_Projet.Models.Priorite.Moyenne ? "info" : 
+                                                              tache.Priorite == Gestion_Projet.Models.Priorite.Haute ? "warning" : "danger")">
+                                        @tache.Priorite
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(tache.Statut == Gestion_Projet.Models.StatutTache.Terminee ? "success" : 
+                                                              tache.Statut == Gestion_Projet.Models.StatutTache.EnCours ? "primary" : "secondary")">
+                                        @tache.Statut
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-controller="Taches" asp-action="Details" asp-route-id="@tache.Id" class="btn btn-info" title="Détails">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-controller="Taches" asp-action="Edit" asp-route-id="@tache.Id" class="btn btn-warning" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Aucune tâche pour ce projet. <a asp-controller="Taches" asp-action="Create" asp-route-projetId="@Model.Id">Ajouter une tâche</a></p>
+        }
+    </div>
+</div>

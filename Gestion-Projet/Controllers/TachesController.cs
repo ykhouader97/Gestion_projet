@@ -64,7 +64,7 @@ public class TachesController : Controller
         
         if (enRetardOnly ?? false)
         {
-            var today = DateTime.Today;
+            var today = DateTime.UtcNow.Date;
             taches = taches.Where(t => t.DateEcheance.HasValue && 
                                       t.DateEcheance.Value < today && 
                                       !t.EstTerminee);
@@ -118,7 +118,10 @@ public class TachesController : Controller
     {
         if (ModelState.IsValid)
         {
-            tache.DateCreation = DateTime.Now;
+            if (tache.DateEcheance.HasValue)
+                tache.DateEcheance = DateTime.SpecifyKind(tache.DateEcheance.Value, DateTimeKind.Utc);
+
+            tache.DateCreation = DateTime.UtcNow;
             tache.EstTerminee = tache.Statut == StatutTache.Terminee;
             _context.Add(tache);
             await _context.SaveChangesAsync();
@@ -175,6 +178,10 @@ public class TachesController : Controller
         {
             try
             {
+                if (tache.DateEcheance.HasValue)
+                    tache.DateEcheance = DateTime.SpecifyKind(tache.DateEcheance.Value, DateTimeKind.Utc);
+                tache.DateCreation = DateTime.SpecifyKind(tache.DateCreation, DateTimeKind.Utc);
+
                 tache.EstTerminee = tache.Statut == StatutTache.Terminee;
                 _context.Update(tache);
                 await _context.SaveChangesAsync();

@@ -94,7 +94,11 @@ public class ProjetsController : Controller
         
         if (ModelState.IsValid)
         {
-            projet.DateCreation = DateTime.Now;
+            projet.DateDebut = DateTime.SpecifyKind(projet.DateDebut, DateTimeKind.Utc);
+            if (projet.DateFinPrevue.HasValue) 
+                projet.DateFinPrevue = DateTime.SpecifyKind(projet.DateFinPrevue.Value, DateTimeKind.Utc);
+            
+            projet.DateCreation = DateTime.UtcNow;
             _context.Add(projet);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Projet créé avec succès!";
@@ -145,6 +149,11 @@ public class ProjetsController : Controller
         {
             try
             {
+                projet.DateDebut = DateTime.SpecifyKind(projet.DateDebut, DateTimeKind.Utc);
+                if (projet.DateFinPrevue.HasValue) 
+                    projet.DateFinPrevue = DateTime.SpecifyKind(projet.DateFinPrevue.Value, DateTimeKind.Utc);
+                projet.DateCreation = DateTime.SpecifyKind(projet.DateCreation, DateTimeKind.Utc);
+
                 _context.Update(projet);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Projet modifié avec succès!";

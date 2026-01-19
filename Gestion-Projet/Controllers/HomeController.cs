@@ -16,7 +16,7 @@ public class HomeController : Controller
     
     public async Task<IActionResult> Index()
     {
-        var today = DateTime.Today;
+        var today = DateTime.UtcNow.Date;
         
         // Statistiques des projets
         var totalProjets = await _context.Projets.CountAsync();

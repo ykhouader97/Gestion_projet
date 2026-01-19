@@ -39,7 +39,7 @@ public class Tache
     public bool EstTerminee { get; set; } = false;
     
     [Display(Name = "Date de création")]
-    public DateTime DateCreation { get; set; } = DateTime.Now;
+    public DateTime DateCreation { get; set; } = DateTime.UtcNow;
     
     // Navigation properties
     [Display(Name = "Projet")]
@@ -52,13 +52,13 @@ public class Tache
     [NotMapped]
     [Display(Name = "En retard")]
     public bool EstEnRetard => DateEcheance.HasValue && 
-                               DateEcheance.Value < DateTime.Today && 
+                               DateEcheance.Value < DateTime.UtcNow.Date && 
                                !EstTerminee;
     
     [NotMapped]
     [Display(Name = "Urgente")]
     public bool EstUrgente => DateEcheance.HasValue && 
-                              DateEcheance.Value <= DateTime.Today.AddDays(3) && 
-                              DateEcheance.Value >= DateTime.Today &&
+                              DateEcheance.Value <= DateTime.UtcNow.Date.AddDays(3) && 
+                              DateEcheance.Value >= DateTime.UtcNow.Date &&
                               !EstTerminee;
 }

@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//ADDING SQLITE DB CONTEXT
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+//ADDING POSTGRESQL DB CONTEXT
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 // Add services to the container.
@@ -21,8 +21,6 @@ using (var scope = app.Services.CreateScope())
     // Ensure database is created
     context.Database.EnsureCreated();
     
-    // Seed data
-    Gestion_Projet.Data.SeedData.Initialize(context);
 }
 
 

@@ -40,7 +40,7 @@ public class Projet
     public StatutProjet Statut { get; set; } = StatutProjet.EnCours;
     
     [Display(Name = "Date de création")]
-    public DateTime DateCreation { get; set; } = DateTime.Now;
+    public DateTime DateCreation { get; set; } = DateTime.UtcNow;
     
     // Navigation properties
     [Display(Name = "Chef de projet")]
@@ -53,7 +53,7 @@ public class Projet
     [NotMapped]
     [Display(Name = "En retard")]
     public bool EstEnRetard => DateFinPrevue.HasValue && 
-                               DateFinPrevue.Value < DateTime.Today && 
+                               DateFinPrevue.Value < DateTime.UtcNow.Date && 
                                Statut != StatutProjet.Termine && 
                                Statut != StatutProjet.Annule;
     

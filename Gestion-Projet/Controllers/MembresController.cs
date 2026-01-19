@@ -83,6 +83,8 @@ public class MembresController : Controller
         
         if (ModelState.IsValid)
         {
+            if (membre.DateEmbauche.HasValue)
+                membre.DateEmbauche = DateTime.SpecifyKind(membre.DateEmbauche.Value, DateTimeKind.Utc);
             _context.Add(membre);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Membre ajouté avec succès!";
@@ -127,6 +129,8 @@ public class MembresController : Controller
         {
             try
             {
+                if (membre.DateEmbauche.HasValue)
+                    membre.DateEmbauche = DateTime.SpecifyKind(membre.DateEmbauche.Value, DateTimeKind.Utc);
                 _context.Update(membre);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Membre modifié avec succès!";
